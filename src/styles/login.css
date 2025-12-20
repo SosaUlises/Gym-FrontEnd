@@ -6,8 +6,10 @@ html, body, #root {
 }
 
 body {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
+
 
 :root{
   --bg-0:#07070b;
@@ -344,7 +346,7 @@ body {
   box-shadow:
     0 12px 34px rgba(255,122,24,.25),
     0 12px 34px rgba(255,61,129,.20);
-
+  transition: transform .18s ease;
   position:relative;
 }
 
@@ -362,6 +364,9 @@ body {
   position:relative;
   z-index:2;
   color: rgba(10,6,16,.95);
+}
+.logo:hover{
+  transform: scale(1.05);
 }
 
 .ok{

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { http } from "../api/http";
 import { authStorage } from "../auth/authStorage";
+import { Link } from "react-router-dom";
 import "../styles/login.css";
 
 type LoginBody = {
@@ -125,9 +126,11 @@ export default function LoginPage() {
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
 
-          <div className="footer">
-            Si aún no tenés cuenta, pedile al admin que te cree el usuario.
-          </div>
+        <div className="footer">
+          ¿No tenés cuenta? <Link className="link" to="/register">Crear cuenta</Link>
+        </div>
+
+
         </div>
       </form>
     </div>

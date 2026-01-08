@@ -9,7 +9,7 @@ type RegisterBody = {
   dni: number;
   email: string;
   password: string;
-  rol: string; // en tu API existe, lo mandamos como Cliente
+  rol: string; 
   edad: number;
   altura: number;
   peso: number;

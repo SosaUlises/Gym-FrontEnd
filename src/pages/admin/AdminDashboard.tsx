@@ -128,7 +128,7 @@ function ClientesPanel() {
         <div className="panel__head">
           <div>
             <div className="panel__title">Clientes</div>
-            <div className="panel__sub">Listado, edición y baja.</div>
+            <div className="panel__sub">Listado, edicion y eliminacion.</div>
           </div>
           <button className="btnMini" onClick={load} disabled={loading}>
             {loading ? "Actualizando..." : "Refrescar"}
@@ -157,7 +157,6 @@ function ClientesPanel() {
                 <tr key={c.id} className={selected?.id === c.id ? "row active" : "row"}>
                   <td>
                     <div className="strong">{c.apellido}, {c.nombre}</div>
-                    <div className="muted">ID: {c.id}</div>
                   </td>
                   <td>{c.email}</td>
                   <td>{c.dni}</td>

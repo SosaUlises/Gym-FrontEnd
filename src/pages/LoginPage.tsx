@@ -30,7 +30,8 @@ export default function LoginPage() {
       if (!token) throw new Error("No llegó el token desde el servidor.");
 
       authStorage.setToken(token);
-      navigate("/"); 
+      const role = authStorage.getRole();
+      navigate(role === "Administrador" ? "/admin" : "/app");
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||

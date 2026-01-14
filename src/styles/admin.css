@@ -251,3 +251,38 @@
 }
 .badge.ok{ border-color: rgba(80,220,160,.25); background: rgba(80,220,160,.08); }
 .badge.warn{ border-color: rgba(255,190,80,.25); background: rgba(255,190,80,.08); }
+
+.genBox{
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.14);
+}
+
+.genBox__title{
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.genBox__row{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+@media (max-width: 900px){
+  .genBox__row{
+    grid-template-columns: 1fr 1fr;
+  }
+  .genBox__row .btnPrimary{
+    grid-column: 1 / -1;
+  }
+}
+
+.genBox__hint{
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .72;
+}

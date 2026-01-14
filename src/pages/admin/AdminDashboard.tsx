@@ -215,6 +215,10 @@ function CuotasPanel() {
   const [estado, setEstado] = useState<"" | "Pendiente" | "Pagado">("");
   const [items, setItems] = useState<Cuota[]>([]);
   const [loading, setLoading] = useState(false);
+  const [gen, setGen] = useState({ anio: "", mes: "", monto: "" });
+  const setGenField = (k: "anio" | "mes" | "monto", v: string) =>
+    setGen((p) => ({ ...p, [k]: v }));
+
 
   const loadByCliente = async () => {
     if (!clienteId) return;
@@ -241,30 +245,83 @@ function CuotasPanel() {
   };
 
   const generar = async () => {
-    if (!confirm("¿Generar cuotas?")) return;
-    setLoading(true);
-    try {
-      // POST /api/v1/cuotas/generar (asumo genera masivo)
-      await http.post("/api/v1/cuotas/generar", {});
-      alert("Generación solicitada.");
-    } catch (e: any) {
-      alert(e?.response?.data?.message ?? e?.message ?? "Error al generar");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const anio = Number(gen.anio);
+  const mes = Number(gen.mes);
+  const monto = Number(gen.monto);
+
+  if (!anio || anio < 2000) return alert("Año inválido");
+  if (!mes || mes < 1 || mes > 12) return alert("Mes inválido (1 a 12)");
+  if (!monto || monto <= 0) return alert("Monto inválido");
+
+  if (!confirm(`¿Generar cuotas para ${mes}/${anio} por $${monto}?`)) return;
+
+  setLoading(true);
+  try {
+    await http.post("/api/v1/cuotas/generar", { anio, mes, monto });
+    alert("Cuotas generadas correctamente.");
+  } catch (e: any) {
+    alert(e?.response?.data?.message ?? e?.message ?? "Error al generar");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="panel">
       <div className="panel__head">
-        <div>
-          <div className="panel__title">Cuotas</div>
-          <div className="panel__sub">Ver por cliente / por estado y generar.</div>
-        </div>
-        <button className="btnPrimary" onClick={generar} disabled={loading}>
-          Generar cuotas
-        </button>
-      </div>
+  <div>
+    <div className="panel__title">Cuotas</div>
+    <div className="panel__sub">Ver por cliente / estado y generar masivo.</div>
+  </div>
+</div>
+
+<div className="genBox">
+  <div className="genBox__title">Generar cuotas</div>
+  <div className="genBox__row">
+    <div className="fieldMini">
+      <div className="labelMini">Año</div>
+      <input
+        className="inputMini"
+        value={gen.anio}
+        onChange={(e) => setGenField("anio", e.target.value)}
+        inputMode="numeric"
+        placeholder="2026"
+      />
+    </div>
+
+    <div className="fieldMini">
+      <div className="labelMini">Mes</div>
+      <input
+        className="inputMini"
+        value={gen.mes}
+        onChange={(e) => setGenField("mes", e.target.value)}
+        inputMode="numeric"
+        placeholder="1-12"
+      />
+    </div>
+
+    <div className="fieldMini">
+      <div className="labelMini">Monto</div>
+      <input
+        className="inputMini"
+        value={gen.monto}
+        onChange={(e) => setGenField("monto", e.target.value)}
+        inputMode="decimal"
+        placeholder="35000"
+      />
+    </div>
+
+    <button className="btnPrimary" onClick={generar} disabled={loading}>
+      {loading ? "Generando..." : "Generar"}
+    </button>
+  </div>
+
+  <div className="genBox__hint">
+    Genera cuotas masivas para todos los clientes para el período indicado.
+  </div>
+</div>
+
 
       <div className="toolbar">
         <input className="inputMini" value={clienteId} onChange={(e) => setClienteId(e.target.value)} placeholder="ClienteId..." />

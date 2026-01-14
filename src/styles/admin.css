@@ -286,3 +286,13 @@
   font-size: 12px;
   opacity: .72;
 }
+
+.genBox__row--single{
+  grid-template-columns: 1.2fr 1fr 1fr 1fr auto;
+}
+
+@media (max-width: 900px){
+  .genBox__row--single{
+    grid-template-columns: 1fr 1fr;
+  }
+}

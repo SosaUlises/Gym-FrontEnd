@@ -215,10 +215,16 @@ function CuotasPanel() {
   const [estado, setEstado] = useState<"" | "Pendiente" | "Pagado">("");
   const [items, setItems] = useState<Cuota[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Generación masiva
   const [gen, setGen] = useState({ anio: "", mes: "", monto: "" });
   const setGenField = (k: "anio" | "mes" | "monto", v: string) =>
     setGen((p) => ({ ...p, [k]: v }));
 
+  // Cuota puntual
+  const [single, setSingle] = useState({ clienteId: "", anio: "", mes: "", monto: "" });
+  const setSingleField = (k: "clienteId" | "anio" | "mes" | "monto", v: string) =>
+    setSingle((p) => ({ ...p, [k]: v }));
 
   const loadByCliente = async () => {
     if (!clienteId) return;
@@ -245,94 +251,192 @@ function CuotasPanel() {
   };
 
   const generar = async () => {
-  const anio = Number(gen.anio);
-  const mes = Number(gen.mes);
-  const monto = Number(gen.monto);
+    const anio = Number(gen.anio);
+    const mes = Number(gen.mes);
+    const monto = Number(gen.monto);
 
-  if (!anio || anio < 2000) return alert("Año inválido");
-  if (!mes || mes < 1 || mes > 12) return alert("Mes inválido (1 a 12)");
-  if (!monto || monto <= 0) return alert("Monto inválido");
+    if (!anio || anio < 2000) return alert("Año inválido");
+    if (!mes || mes < 1 || mes > 12) return alert("Mes inválido (1 a 12)");
+    if (!monto || monto <= 0) return alert("Monto inválido");
 
-  if (!confirm(`¿Generar cuotas para ${mes}/${anio} por $${monto}?`)) return;
+    if (!confirm(`¿Generar cuotas para ${mes}/${anio} por $${monto}?`)) return;
 
-  setLoading(true);
-  try {
-    await http.post("/api/v1/cuotas/generar", { anio, mes, monto });
-    alert("Cuotas generadas correctamente.");
-  } catch (e: any) {
-    alert(e?.response?.data?.message ?? e?.message ?? "Error al generar");
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      await http.post("/api/v1/cuotas/generar", { anio, mes, monto });
+      alert("Cuotas generadas correctamente.");
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? e?.message ?? "Error al generar");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const crearCuotaPuntual = async () => {
+    const clienteIdNum = Number(single.clienteId);
+    const anio = Number(single.anio);
+    const mes = Number(single.mes);
+    const monto = Number(single.monto);
+
+    if (!clienteIdNum || clienteIdNum <= 0) return alert("ClienteId inválido");
+    if (!anio || anio < 2000) return alert("Año inválido");
+    if (!mes || mes < 1 || mes > 12) return alert("Mes inválido (1 a 12)");
+    if (!monto || monto <= 0) return alert("Monto inválido");
+
+    if (!confirm(`¿Crear cuota para cliente ${clienteIdNum} (${mes}/${anio}) por $${monto}?`)) return;
+
+    setLoading(true);
+    try {
+      await http.post(`/api/v1/cuotas/clientes/${clienteIdNum}/cuotas`, { anio, mes, monto });
+      alert("Cuota creada correctamente.");
+
+      // Si justo estás mirando ese cliente, refrescamos automáticamente
+      if (clienteId && Number(clienteId) === clienteIdNum) {
+        await loadByCliente();
+      }
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? e?.message ?? "Error al crear cuota");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="panel">
       <div className="panel__head">
-  <div>
-    <div className="panel__title">Cuotas</div>
-    <div className="panel__sub">Ver por cliente / estado y generar masivo.</div>
-  </div>
-</div>
+        <div>
+          <div className="panel__title">Cuotas</div>
+          <div className="panel__sub">Ver por cliente / estado, generar masivo y crear puntual.</div>
+        </div>
+      </div>
 
-<div className="genBox">
-  <div className="genBox__title">Generar cuotas</div>
-  <div className="genBox__row">
-    <div className="fieldMini">
-      <div className="labelMini">Año</div>
-      <input
-        className="inputMini"
-        value={gen.anio}
-        onChange={(e) => setGenField("anio", e.target.value)}
-        inputMode="numeric"
-        placeholder="2026"
-      />
-    </div>
+      {/* Generación masiva */}
+      <div className="genBox">
+        <div className="genBox__title">Generar cuotas (masivo)</div>
+        <div className="genBox__row">
+          <div className="fieldMini">
+            <div className="labelMini">Año</div>
+            <input
+              className="inputMini"
+              value={gen.anio}
+              onChange={(e) => setGenField("anio", e.target.value)}
+              inputMode="numeric"
+              placeholder="2026"
+            />
+          </div>
 
-    <div className="fieldMini">
-      <div className="labelMini">Mes</div>
-      <input
-        className="inputMini"
-        value={gen.mes}
-        onChange={(e) => setGenField("mes", e.target.value)}
-        inputMode="numeric"
-        placeholder="1-12"
-      />
-    </div>
+          <div className="fieldMini">
+            <div className="labelMini">Mes</div>
+            <input
+              className="inputMini"
+              value={gen.mes}
+              onChange={(e) => setGenField("mes", e.target.value)}
+              inputMode="numeric"
+              placeholder="1-12"
+            />
+          </div>
 
-    <div className="fieldMini">
-      <div className="labelMini">Monto</div>
-      <input
-        className="inputMini"
-        value={gen.monto}
-        onChange={(e) => setGenField("monto", e.target.value)}
-        inputMode="decimal"
-        placeholder="35000"
-      />
-    </div>
+          <div className="fieldMini">
+            <div className="labelMini">Monto</div>
+            <input
+              className="inputMini"
+              value={gen.monto}
+              onChange={(e) => setGenField("monto", e.target.value)}
+              inputMode="decimal"
+              placeholder="35000"
+            />
+          </div>
 
-    <button className="btnPrimary" onClick={generar} disabled={loading}>
-      {loading ? "Generando..." : "Generar"}
-    </button>
-  </div>
+          <button className="btnPrimary" onClick={generar} disabled={loading}>
+            {loading ? "Generando..." : "Generar"}
+          </button>
+        </div>
 
-  <div className="genBox__hint">
-    Genera cuotas masivas para todos los clientes para el período indicado.
-  </div>
-</div>
+        <div className="genBox__hint">
+          Genera cuotas masivas para todos los clientes para el período indicado.
+        </div>
+      </div>
 
+      {/* Cuota puntual */}
+      <div className="genBox">
+        <div className="genBox__title">Crear cuota puntual</div>
 
+        <div className="genBox__row genBox__row--single">
+          <div className="fieldMini">
+            <div className="labelMini">ClienteId</div>
+            <input
+              className="inputMini"
+              value={single.clienteId}
+              onChange={(e) => setSingleField("clienteId", e.target.value)}
+              inputMode="numeric"
+              placeholder="123"
+            />
+          </div>
+
+          <div className="fieldMini">
+            <div className="labelMini">Año</div>
+            <input
+              className="inputMini"
+              value={single.anio}
+              onChange={(e) => setSingleField("anio", e.target.value)}
+              inputMode="numeric"
+              placeholder="2026"
+            />
+          </div>
+
+          <div className="fieldMini">
+            <div className="labelMini">Mes</div>
+            <input
+              className="inputMini"
+              value={single.mes}
+              onChange={(e) => setSingleField("mes", e.target.value)}
+              inputMode="numeric"
+              placeholder="1-12"
+            />
+          </div>
+
+          <div className="fieldMini">
+            <div className="labelMini">Monto</div>
+            <input
+              className="inputMini"
+              value={single.monto}
+              onChange={(e) => setSingleField("monto", e.target.value)}
+              inputMode="decimal"
+              placeholder="35000"
+            />
+          </div>
+
+          <button className="btnPrimary" onClick={crearCuotaPuntual} disabled={loading}>
+            {loading ? "Creando..." : "Crear"}
+          </button>
+        </div>
+
+        <div className="genBox__hint">
+          Crea una cuota individual para un cliente específico.
+        </div>
+      </div>
+
+      {/* Filtros / búsquedas */}
       <div className="toolbar">
-        <input className="inputMini" value={clienteId} onChange={(e) => setClienteId(e.target.value)} placeholder="ClienteId..." />
-        <button className="btnMini" onClick={loadByCliente} disabled={loading || !clienteId}>Buscar por cliente</button>
+        <input
+          className="inputMini"
+          value={clienteId}
+          onChange={(e) => setClienteId(e.target.value)}
+          placeholder="ClienteId..."
+        />
+        <button className="btnMini" onClick={loadByCliente} disabled={loading || !clienteId}>
+          Buscar por cliente
+        </button>
 
         <select className="selectMini" value={estado} onChange={(e) => setEstado(e.target.value as any)}>
           <option value="">Estado...</option>
           <option value="Pendiente">Pendiente</option>
           <option value="Pagado">Pagado</option>
         </select>
-        <button className="btnMini" onClick={loadByEstado} disabled={loading || !estado}>Buscar por estado</button>
+
+        <button className="btnMini" onClick={loadByEstado} disabled={loading || !estado}>
+          Buscar por estado
+        </button>
 
         <span className="chip">{items.length} cuotas</span>
       </div>
@@ -349,17 +453,28 @@ function CuotasPanel() {
             </tr>
           </thead>
           <tbody>
-            {items.map(c => (
+            {items.map((c) => (
               <tr key={c.id} className="row">
                 <td>{c.id}</td>
                 <td>{c.clienteId}</td>
-                <td>{c.mes}/{c.anio}</td>
+                <td>
+                  {c.mes}/{c.anio}
+                </td>
                 <td>{c.monto}</td>
-                <td><span className={c.estado === "Pagado" ? "badge ok" : "badge warn"}>{c.estado}</span></td>
+                <td>
+                  <span className={c.estado === "Pagado" ? "badge ok" : "badge warn"}>
+                    {c.estado}
+                  </span>
+                </td>
               </tr>
             ))}
+
             {!loading && items.length === 0 && (
-              <tr><td colSpan={5} className="empty">Sin datos</td></tr>
+              <tr>
+                <td colSpan={5} className="empty">
+                  Sin datos
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -367,6 +482,7 @@ function CuotasPanel() {
     </div>
   );
 }
+
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (

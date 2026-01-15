@@ -296,6 +296,16 @@ function CuotasPanel() {
   return () => window.removeEventListener("goCuotas", handler);
 }, []);
 
+function normalizeCuota(x: any) {
+  return {
+    id: x?.id ?? x?.Id ?? null,
+    clienteId: x?.clienteId ?? x?.clienteID ?? x?.ClienteId ?? x?.cliente_id ?? x?.ClienteID ?? x?.cliente?.id ?? x?.Cliente?.Id ?? null,
+    anio: x?.anio ?? x?.Anio ?? null,
+    mes: x?.mes ?? x?.Mes ?? null,
+    monto: x?.monto ?? x?.Monto ?? null,
+    estado: x?.estado ?? x?.Estado ?? null,
+  };
+}
 
   // Generación masiva
   const [gen, setGen] = useState({ anio: "", mes: "", monto: "" });
@@ -313,7 +323,9 @@ function CuotasPanel() {
     try {
       const res = await http.get(`/api/v1/cuotas/get-by-clienteId/${clienteId}`);
       const data = res.data?.data ?? res.data?.Data ?? res.data;
-      setItems(Array.isArray(data) ? data : []);
+      const arr = Array.isArray(data) ? data : [];
+      setItems(arr.map(normalizeCuota));
+
     } finally {
       setLoading(false);
     }
@@ -526,7 +538,6 @@ function CuotasPanel() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Cliente</th>
               <th>Período</th>
               <th>Monto</th>
@@ -536,13 +547,12 @@ function CuotasPanel() {
           <tbody>
             {items.map((c) => (
               <tr key={c.id} className="row">
-                <td>{c.id}</td>
-                <td>{c.clienteId}</td>
-                <td>
+                <td className="center">{c.clienteId ?? "-"}</td>
+                <td className="center">
                   {c.mes}/{c.anio}
                 </td>
-                <td>{c.monto}</td>
-                <td>
+                <td className="center">{c.monto}</td>
+                <td className="center">
                   <span className={c.estado === "Pagado" ? "badge ok" : "badge warn"}>
                     {c.estado}
                   </span>
@@ -552,12 +562,13 @@ function CuotasPanel() {
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={5} className="empty">
+                <td colSpan={4} className="empty">
                   Sin datos
                 </td>
               </tr>
             )}
           </tbody>
+
         </table>
       </div>
     </div>

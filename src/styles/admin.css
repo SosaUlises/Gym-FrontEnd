@@ -492,5 +492,33 @@
   }
 }
 
+
 /* ---------- Quality of life ---------- */
 *{ box-sizing: border-box; }
+
+/* Centrado general de celdas */
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+/* Centrar columnas específicas (cuotas) */
+.table td.center,
+.table th.center {
+  text-align: center;
+}
+
+/* Badge centrado */
+.table td .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estado vacío */
+.empty {
+  text-align: center;
+  padding: 24px;
+  font-size: 14px;
+  opacity: .7;
+}

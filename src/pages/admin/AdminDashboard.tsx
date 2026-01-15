@@ -43,12 +43,16 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {tab === "clientes" ? <ClientesPanel /> : <CuotasPanel />}
+      {tab === "clientes"
+      ? <ClientesPanel goToCuotas={(id) => { setTab("cuotas"); setTimeout(() => window.dispatchEvent(new CustomEvent("goCuotas", { detail: id })), 0); }} />
+      : <CuotasPanel />
+      }
+
     </AdminLayout>
   );
 }
 
-function ClientesPanel() {
+function ClientesPanel({ goToCuotas }: { goToCuotas: (clienteId: number) => void }) {
   const [items, setItems] = useState<Cliente[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,56 +61,91 @@ function ClientesPanel() {
   const [selected, setSelected] = useState<Cliente | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const normalizeCliente = (x: any): Cliente => {
+    const id = x.id ?? x.Id ?? x.clienteId ?? x.ClienteId ?? 0;
+
+    return {
+
+      id: Number(id),
+
+      usuarioId: x.usuarioId ?? x.UsuarioId ?? null,
+
+      nombre: x.nombre ?? x.Nombre ?? "",
+      apellido: x.apellido ?? x.Apellido ?? "",
+      dni: Number(x.dni ?? x.Dni ?? 0),
+      email: x.email ?? x.Email ?? "",
+
+      edad: Number(x.edad ?? x.Edad ?? 0),
+      altura: Number(x.altura ?? x.Altura ?? 0),
+      peso: Number(x.peso ?? x.Peso ?? 0),
+      objetivo: x.objetivo ?? x.Objetivo ?? null,
+
+      fechaRegistro: x.fechaRegistro ?? x.FechaRegistro ?? null,
+    } as any;
+  };
+
   const load = async () => {
     setLoading(true);
     setErr(null);
     try {
-      // Swagger muestra GET /api/v1/cliente (admin list)
       const res = await http.get("/api/v1/cliente");
-      const data = res.data?.data ?? res.data?.Data ?? res.data;
-      setItems(Array.isArray(data) ? data : data?.items ?? []);
+
+      
+      const raw = res.data?.data ?? res.data?.Data ?? res.data;
+      const list = Array.isArray(raw) ? raw : raw?.items ?? raw?.Items ?? [];
+
+      const normalized = (Array.isArray(list) ? list : []).map(normalizeCliente);
+
+      setItems(normalized);
     } catch (e: any) {
-      setErr(e?.response?.data?.message ?? e?.message ?? "Error cargando clientes");
+      setErr(e?.response?.data?.message ?? e?.response?.data?.Message ?? e?.message ?? "Error cargando clientes");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return items;
-    return items.filter(c =>
+    return items.filter((c) =>
       `${c.nombre} ${c.apellido}`.toLowerCase().includes(s) ||
       String(c.dni).includes(s) ||
-      c.email.toLowerCase().includes(s)
+      (c.email ?? "").toLowerCase().includes(s)
     );
   }, [items, q]);
 
   const onDelete = async (clienteId: number) => {
+    if (!clienteId) return alert("ClienteId inválido");
     if (!confirm("¿Eliminar cliente? Esto borra el usuario asociado.")) return;
+
     try {
       await http.delete(`/api/v1/cliente/${clienteId}`);
-      setItems(prev => prev.filter(x => x.id !== clienteId));
+      setItems((prev) => prev.filter((x) => x.id !== clienteId));
       if (selected?.id === clienteId) setSelected(null);
     } catch (e: any) {
-      alert(e?.response?.data?.message ?? e?.message ?? "Error al borrar");
+      alert(e?.response?.data?.message ?? e?.response?.data?.Message ?? e?.message ?? "Error al borrar");
     }
   };
 
   const onSave = async () => {
     if (!selected) return;
+    if (!selected.id) return alert("ClienteId inválido (no llegó del API)");
+
     setSaving(true);
     try {
-      // PUT /api/v1/cliente/{clienteId}
       await http.put(`/api/v1/cliente/${selected.id}`, {
         nombre: selected.nombre,
         apellido: selected.apellido,
         email: selected.email,
         dni: selected.dni,
+
         password: null,
-        rol: "Cliente", 
+        rol: null,
+
         edad: selected.edad,
         altura: selected.altura,
         peso: selected.peso,
@@ -116,7 +155,7 @@ function ClientesPanel() {
       await load();
       alert("Cliente actualizado");
     } catch (e: any) {
-      alert(e?.response?.data?.message ?? e?.message ?? "Error al editar");
+      alert(e?.response?.data?.message ?? e?.response?.data?.Message ?? e?.message ?? "Error al editar");
     } finally {
       setSaving(false);
     }
@@ -128,7 +167,7 @@ function ClientesPanel() {
         <div className="panel__head">
           <div>
             <div className="panel__title">Clientes</div>
-            <div className="panel__sub">Listado, edicion y eliminacion.</div>
+            <div className="panel__sub">Listado, edición y eliminación.</div>
           </div>
           <button className="btnMini" onClick={load} disabled={loading}>
             {loading ? "Actualizando..." : "Refrescar"}
@@ -136,7 +175,12 @@ function ClientesPanel() {
         </div>
 
         <div className="toolbar">
-          <input className="inputMini" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre, email o DNI..." />
+          <input
+            className="inputMini"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre, email o DNI..."
+          />
           <span className="chip">{filtered.length} resultados</span>
         </div>
 
@@ -146,28 +190,52 @@ function ClientesPanel() {
           <table className="table">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Cliente</th>
                 <th>Email</th>
                 <th>DNI</th>
                 <th>Acciones</th>
               </tr>
             </thead>
+
             <tbody>
-              {filtered.map(c => (
+              {filtered.map((c) => (
                 <tr key={c.id} className={selected?.id === c.id ? "row active" : "row"}>
+                   <td>
+                    <div className="mutedMini">{c.id}</div>
+                  </td>
                   <td>
                     <div className="strong">{c.apellido}, {c.nombre}</div>
                   </td>
                   <td>{c.email}</td>
                   <td>{c.dni}</td>
+
                   <td className="actions">
-                    <button className="ghost" onClick={() => setSelected(c)}>Editar</button>
-                    <button className="danger" onClick={() => onDelete(c.id)}>Borrar</button>
+                    <button className="ghost" onClick={() => setSelected(c)}>
+                      Editar
+                    </button>
+
+                    <button
+                      className="ghost"
+                      onClick={() => {
+                        if (!c.id) return alert("ClienteId inválido");
+                        goToCuotas(c.id);
+                      }}
+                    >
+                      Cuotas
+                    </button>
+
+                    <button className="danger" onClick={() => onDelete(c.id)}>
+                      Borrar
+                    </button>
                   </td>
                 </tr>
               ))}
+
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={4} className="empty">Sin resultados</td></tr>
+                <tr>
+                  <td colSpan={4} className="empty">Sin resultados</td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -210,11 +278,24 @@ function ClientesPanel() {
   );
 }
 
+
 function CuotasPanel() {
   const [clienteId, setClienteId] = useState("");
   const [estado, setEstado] = useState<"" | "Pendiente" | "Pagado">("");
   const [items, setItems] = useState<Cuota[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+  const handler = (e: any) => {
+    const id = String(e.detail);
+    setClienteId(id);
+    setTimeout(() => loadByCliente(), 0);
+  };
+
+  window.addEventListener("goCuotas", handler);
+  return () => window.removeEventListener("goCuotas", handler);
+}, []);
+
 
   // Generación masiva
   const [gen, setGen] = useState({ anio: "", mes: "", monto: "" });

@@ -218,11 +218,14 @@ function ClientesPanel({ goToCuotas }: { goToCuotas: (clienteId: number) => void
             </div>
           </td>
 
-          <td className="actions">
+                <td className="tdActions">
+          <div className="actions">
             <button className="ghost" onClick={() => setSelected(c)}>Editar</button>
             <button className="ghost" onClick={() => goToCuotas(c.id)}>Cuotas</button>
             <button className="danger" onClick={() => onDelete(c.id)}>Borrar</button>
-          </td>
+          </div>
+        </td>
+
         </tr>
       ))}
 

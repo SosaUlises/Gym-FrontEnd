@@ -1,4 +1,4 @@
-/* =========================================================
+/* ========================================================= 
    ADMIN DASHBOARD (Option B - Dark Elegante)
    - Base azul petróleo (no negro)
    - Naranja como acento (no dominante)
@@ -38,6 +38,9 @@
   --radius-sm: 12px;
 }
 
+/* ---------- Quality of life ---------- */
+*{ box-sizing: border-box; }
+
 /* ---------- Layout ---------- */
 .admin{
   min-height: 100vh;
@@ -45,7 +48,6 @@
   color: var(--text);
   font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-  /* Dark elegante: azul petróleo + luces suaves */
   background:
     radial-gradient(900px 600px at 12% 18%, rgba(251,146,60,.10), transparent 62%),
     radial-gradient(900px 600px at 82% 28%, rgba(59,130,246,.08), transparent 60%),
@@ -83,7 +85,6 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  /* Menos “neón”: acento suave */
   background: linear-gradient(135deg, rgba(251,146,60,1), rgba(249,115,22,1));
   color: rgba(15,23,42,.98);
 }
@@ -184,17 +185,15 @@
   display:grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 14px;
-  align-items: start; /* evita estiramientos raros */
+  align-items: start;
 }
-
-
 
 @media (max-width: 1100px){
   .admin__sidebar{ display:none; }
   .grid{ grid-template-columns: 1fr; }
 }
 
-/* ---------- Panels (más “calmos”) ---------- */
+/* ---------- Panels ---------- */
 .panel{
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
@@ -204,15 +203,8 @@
   min-width: 0;
 }
 
-
-.panel--editor{
-  min-width: 0;
-}
-
-.panel--editor .formGrid{
-  max-width: 100%;
-}
-
+.panel--editor{ min-width: 0; }
+.panel--editor .formGrid{ max-width: 100%; }
 
 /* Head */
 .panel__head{
@@ -225,7 +217,7 @@
 .panel__title{ font-weight: 900; letter-spacing: -.2px; }
 .panel__sub{ font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-/* Section spacing helpers (para que no quede todo pegado) */
+/* Section spacing helpers */
 .section{ margin-bottom: 22px; }
 .section:last-child{ margin-bottom: 0; }
 
@@ -259,14 +251,10 @@
   padding: 8px 12px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255,255,255,.14);
-
-  /* tono frío base */
-  background: rgba(30,41,59,.65); /* slate */
+  background: rgba(30,41,59,.65);
   color: rgba(229,231,235,.92);
-
   font-weight: 500;
   cursor: pointer;
-
   transition:
     background-color 240ms ease,
     border-color 240ms ease,
@@ -276,14 +264,11 @@
 
 .btnMini:hover{
   background: rgba(30,41,59,.85);
-  border-color: rgba(251,146,60,.28);   /* aparece el naranja */
+  border-color: rgba(251,146,60,.28);
   box-shadow: 0 0 0 3px rgba(251,146,60,.10);
 }
 
-.btnMini:active{
-  transform: translateY(1px);
-}
-
+.btnMini:active{ transform: translateY(1px); }
 
 /* Botón principal */
 .btnPrimary{
@@ -294,7 +279,6 @@
   color: rgba(255,255,255,.92);
   font-weight: 600;
   cursor: pointer;
-
   transition:
     background-color 240ms ease,
     border-color 240ms ease,
@@ -312,7 +296,6 @@
   cursor: not-allowed;
 }
 
-
 .chip{
   padding: 6px 10px;
   border-radius: 999px;
@@ -325,7 +308,7 @@
 /* ===== Tabla clientes (limpia y prolija) ===== */
 
 .tableWrap{
-  overflow: hidden;                 /* sin scroll horizontal feo */
+  overflow: hidden;                 /* NO scroll horizontal */
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.10);
@@ -333,24 +316,24 @@
 
 .table{
   width: 100%;
-  border-collapse: collapse;        /* tabla tradicional */
-  table-layout: fixed;              /* clave para que no rompa layout */
+  border-collapse: collapse;
+  table-layout: fixed;              /* clave para que no rompa */
 }
 
-/* 1) Más ancho para Acciones */
-.table thead th:nth-child(4),
-.table tbody td:nth-child(4){ width: 22%; }  /* antes 16% */
-
-/* Re-balanceo leve (para que siga entrando todo) */
+/* === Ajuste columnas (más aire para acciones) === */
 .table thead th:nth-child(1),
-.table tbody td:nth-child(1){ width: 30%; }
+.table tbody td:nth-child(1){ width: 30%; }  /* Cliente */
 
 .table thead th:nth-child(2),
-.table tbody td:nth-child(2){ width: 34%; }
+.table tbody td:nth-child(2){ width: 36%; }  /* Email */
 
 .table thead th:nth-child(3),
-.table tbody td:nth-child(3){ width: 14%; }
+.table tbody td:nth-child(3){ width: 14%; }  /* DNI */
 
+.table thead th:nth-child(4),
+.table tbody td:nth-child(4){ width: 20%; }  /* Acciones */
+
+/* Header */
 .table thead th{
   font-size: 12px;
   color: rgba(156,163,175,.90);
@@ -363,79 +346,72 @@
 
 .thActions{ text-align: center; }
 
+/* Celdas */
 .table tbody td{
   padding: 12px 12px;
   border-bottom: 1px solid rgba(255,255,255,.06);
   vertical-align: middle;
-  overflow: hidden;                /* respeta el fixed layout */
+  overflow: hidden;                 /* IMPORTANTÍSIMO: evita superposición */
 }
 
-.table tbody td.actions{
-  overflow: visible;         /* solo en acciones */
-  position: relative;        /* crea contexto */
-}
+/* Hover/activa */
+.table tbody tr:hover{ background: rgba(255,255,255,.03); }
+.row.active{ background: rgba(251,146,60,.06); }
 
-/* Fila hover/activa prolija */
-.table tbody tr:hover{
-  background: rgba(255,255,255,.03);
-}
-
-.row.active{
-  background: rgba(251,146,60,.06);
-}
-
-/* Texto: sin clamp (cero warnings) y sin cortar feo */
-.tdName{
-  font-weight: 800;
-  white-space: normal;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  line-height: 1.15;
-  max-height: calc(1.15em * 2);    /* 2 líneas */
-}
-
+/* Texto sin clamp: 2 líneas por max-height + wrap */
+.tdName,
 .tdEmail{
-  white-space: normal;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  line-height: 1.15;
-  max-height: calc(1.15em * 2);    /* 2 líneas */
-  opacity: .92;
+  display: block;
+  white-space: normal;        /* permite salto de línea */
+  overflow: visible;          /* no recortes internos */
+  text-overflow: unset;
+  overflow-wrap: anywhere;    /* corta palabras largas */
+  word-break: break-word;
+  line-height: 1.25;
+  max-height: none;           /* CLAVE: sin límite de líneas */
 }
 
-/* Asegurá que el DNI no “suba” ni se desaline */
+.tdName{ font-weight: 800; }
+.tdEmail{ opacity: .92; }
+
 .tdDni{
   display: block;
   white-space: nowrap;
-  text-align: left;          /* o center si querés */
 }
 
-
-/* 2) Evitar que el flex se “corte” dentro de la celda */
-.table tbody td{ overflow: visible; }         /* importante */
-
-/* 3) Acciones: wrap prolijo y centrado */
+/* Acciones: centradas, wrap adentro de su celda, sin “pisar” DNI */
+.table tbody td.actions{
+  overflow: visible;          /* permite que botones se vean */
+}
 .actions{
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;           /* baja a 2da línea dentro de SU celda */
-  min-height: 34px;          /* asegura altura consistente */
+  flex-wrap: wrap;            /* si no entra, baja dentro de la celda */
 }
 
-/* Si alguna vez no entra, en pantallas chicas se apilan prolijo */
+/* En pantallas chicas, apila más amigable */
 @media (max-width: 900px){
-  .actions{ flex-wrap: wrap; }
+  .table thead th:nth-child(1),
+  .table tbody td:nth-child(1){ width: 36%; }
+
+  .table thead th:nth-child(2),
+  .table tbody td:nth-child(2){ width: 40%; }
+
+  .table thead th:nth-child(3),
+  .table tbody td:nth-child(3){ width: 24%; }
+
+  .table thead th:nth-child(4),
+  .table tbody td:nth-child(4){ width: auto; } /* deja respirar */
 }
-
-
 
 /* Text helpers */
 .strong{ font-weight: 800; }
 .muted{ font-size: 12px; color: var(--muted); margin-top: 2px; }
 .mutedMini{ font-size: 12px; color: rgba(156,163,175,.75); margin-top: 2px; }
 
+/* Buttons in table */
 .ghost, .danger{
   padding: 7px 10px;
   border-radius: 12px;
@@ -444,7 +420,6 @@
 }
 
 .ghost{
-  padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: rgba(15,23,42,.55);
@@ -459,7 +434,6 @@
 .ghost:active{ transform: translateY(1px); }
 
 .danger{
-  padding: 7px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--dangerBd);
   background: var(--dangerBg);
@@ -471,7 +445,14 @@
 .danger:active{ transform: translateY(1px); }
 
 /* Empty states */
-.empty{ text-align:center; padding: 18px; color: rgba(156,163,175,.80); }
+.empty{
+  text-align:center;
+  padding: 24px;
+  font-size: 14px;
+  color: rgba(156,163,175,.80);
+  opacity: .85;
+}
+
 .emptyBox{
   padding: 18px;
   border-radius: var(--radius-md);
@@ -488,9 +469,7 @@
 .labelMini{ font-size: 12px; color: rgba(156,163,175,.90); }
 
 .fieldMini,
-.field{
-  min-width: 0;
-}
+.field{ min-width: 0; }
 
 .inputMini,
 .input{
@@ -526,7 +505,6 @@
   align-items:center;
   gap: 6px;
 }
-
 .badge.ok{
   border-color: var(--okBd);
   background: var(--okBg);
@@ -538,7 +516,7 @@
   color: rgba(255,236,205,.92);
 }
 
-/* ---------- GenBox (Cuotas) - más aire + menos bloque ---------- */
+/* ---------- GenBox (Cuotas) ---------- */
 .genBox{
   margin-bottom: 18px;
   padding: 16px;
@@ -561,12 +539,8 @@
 }
 
 @media (max-width: 900px){
-  .genBox__row{
-    grid-template-columns: 1fr 1fr;
-  }
-  .genBox__row .btnPrimary{
-    grid-column: 1 / -1;
-  }
+  .genBox__row{ grid-template-columns: 1fr 1fr; }
+  .genBox__row .btnPrimary{ grid-column: 1 / -1; }
 }
 
 .genBox__hint{
@@ -581,38 +555,24 @@
 }
 
 @media (max-width: 900px){
-  .genBox__row--single{
-    grid-template-columns: 1fr 1fr;
-  }
+  .genBox__row--single{ grid-template-columns: 1fr 1fr; }
 }
-
-
-/* ---------- Quality of life ---------- */
-*{ box-sizing: border-box; }
 
 /* Centrado general de celdas */
 .table td,
-.table th {
+.table th{
   vertical-align: middle;
 }
 
 /* Centrar columnas específicas (cuotas) */
 .table td.center,
-.table th.center {
+.table th.center{
   text-align: center;
 }
 
 /* Badge centrado */
-.table td .badge {
+.table td .badge{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Estado vacío */
-.empty {
-  text-align: center;
-  padding: 24px;
-  font-size: 14px;
-  opacity: .7;
 }

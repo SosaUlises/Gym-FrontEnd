@@ -163,7 +163,7 @@ function ClientesPanel({ goToCuotas }: { goToCuotas: (clienteId: number) => void
 
   return (
     <div className="grid">
-      <div className="panel">
+      <div className="panel panel--editor">
         <div className="panel__head">
           <div>
             <div className="panel__title">Clientes</div>
@@ -187,59 +187,55 @@ function ClientesPanel({ goToCuotas }: { goToCuotas: (clienteId: number) => void
         {err && <div className="bannerErr">{err}</div>}
 
         <div className="tableWrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Email</th>
-                <th>DNI</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Email</th>
+        <th>DNI</th>
+        <th className="thActions">Acciones</th>
+      </tr>
+    </thead>
 
-            <tbody>
-              {filtered.map((c) => (
-                <tr key={c.id} className={selected?.id === c.id ? "row active" : "row"}>
-                   <td>
-                    <div className="mutedMini">{c.id}</div>
-                  </td>
-                  <td>
-                    <div className="strong">{c.apellido}, {c.nombre}</div>
-                  </td>
-                  <td>{c.email}</td>
-                  <td>{c.dni}</td>
+    <tbody>
+      {filtered.map((c) => (
+        <tr key={c.id} className={selected?.id === c.id ? "row active" : "row"}>
+          <td>
+            <div className="tdName" title={`${c.apellido}, ${c.nombre}`}>
+              {c.apellido}, {c.nombre}
+            </div>
+          </td>
 
-                  <td className="actions">
-                    <button className="ghost" onClick={() => setSelected(c)}>
-                      Editar
-                    </button>
+          <td>
+            <div className="tdEmail" title={c.email}>
+              {c.email}
+            </div>
+          </td>
 
-                    <button
-                      className="ghost"
-                      onClick={() => {
-                        if (!c.id) return alert("ClienteId inválido");
-                        goToCuotas(c.id);
-                      }}
-                    >
-                      Cuotas
-                    </button>
+          <td>
+            <div className="tdDni" title={String(c.dni)}>
+              {c.dni}
+            </div>
+          </td>
 
-                    <button className="danger" onClick={() => onDelete(c.id)}>
-                      Borrar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+          <td className="actions">
+            <button className="ghost" onClick={() => setSelected(c)}>Editar</button>
+            <button className="ghost" onClick={() => goToCuotas(c.id)}>Cuotas</button>
+            <button className="danger" onClick={() => onDelete(c.id)}>Borrar</button>
+          </td>
+        </tr>
+      ))}
 
-              {!loading && filtered.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="empty">Sin resultados</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {!loading && filtered.length === 0 && (
+        <tr>
+          <td colSpan={4} className="empty">Sin resultados</td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+
       </div>
 
       <div className="panel">

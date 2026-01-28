@@ -6,14 +6,58 @@ type AuthUser = {
   rol?: string;
 };
 
-function decodeJwt(token: string): any | null {
+function base64UrlToJson(base64Url: string): any | null {
   try {
-    const payload = token.split(".")[1];
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    // Base64URL -> Base64
+    let b64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+
+    // padding
+    const pad = b64.length % 4;
+    if (pad) b64 += "=".repeat(4 - pad);
+
+    const json = atob(b64);
     return JSON.parse(json);
   } catch {
     return null;
   }
+}
+
+function decodeJwt(token: string): any | null {
+  const parts = token.split(".");
+  if (parts.length < 2) return null;
+  return base64UrlToJson(parts[1]);
+}
+
+function pickRole(payload: any): string | null {
+  if (!payload) return null;
+
+  // casos comunes
+  const direct =
+    payload.role ??
+    payload.Rol ??
+    payload.roles ??
+    payload.Roles ??
+    payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+  if (!direct) return null;
+
+  // a veces viene como array
+  if (Array.isArray(direct)) return direct[0] ?? null;
+
+  return String(direct);
+}
+
+function pickUserId(payload: any): number {
+  if (!payload) return 0;
+
+  const raw =
+    payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ??
+    payload.nameid ??
+    payload.NameIdentifier ??
+    payload.sub;
+
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
 }
 
 export const authStorage = {
@@ -28,19 +72,13 @@ export const authStorage = {
   clear() {
     localStorage.removeItem(TOKEN_KEY);
   },
-  
+
   getRole(): string | null {
     const token = this.getToken();
     if (!token) return null;
 
     const payload = decodeJwt(token);
-
-    return (
-      payload?.role ||
-      payload?.Rol ||
-      payload?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
-      null
-    );
+    return pickRole(payload);
   },
 
   getUser(): AuthUser | null {
@@ -48,16 +86,12 @@ export const authStorage = {
     if (!token) return null;
 
     const payload = decodeJwt(token);
+    if (!payload) return null;
 
     return {
-      id: Number(
-        payload?.sub ??
-        payload?.nameid ??
-        payload?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ??
-        0
-      ),
-      email: payload?.email,
-      rol: this.getRole() ?? undefined
+      id: pickUserId(payload),
+      email: payload.email ?? payload.Email,
+      rol: this.getRole() ?? undefined,
     };
-  }
+  },
 };
